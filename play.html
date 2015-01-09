@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Webtris</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script type="text/javascript" src="js/jquery-1.11.1.min.js"></script>
+        <script type="text/javascript" src="js/jquery-ui.min.js"></script>
+        <link rel="stylesheet" type="text/css" href="css/jquery-ui.min.css">
+        <style>
+            #game { 
+                margin:100px auto; 
+                padding:20px; 
+                width:320px; 
+                height:400px;
+            }
+            #game-background {
+                border:1px solid #666; 
+                border-radius: 4px;
+                background: rgba(240,240,240,1); 
+                width:100%; 
+                height:100%;
+                box-shadow: 0px 4px 20px #000;
+            }
+            #game-overlay {
+                border:none;
+                position: absolute; 
+                z-index:99;
+            }
+            #game-board {
+                position:relative; 
+                z-index:999;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="game">
+            <div id="game-background">
+                <div id="game-overlay"></div>
+                <canvas id="game-board" width="320" height="400"></canvas>
+            </div>
+        </div>
+
+        <script type="text/javascript" src="tetris.js"></script>
+        <script>
+            //Construct the game 
+            var game = new Game("game-board");
+            game.init();
+
+            var currentSize = {width: 320, height: 400};
+            var minSize = {width: 280, height: 340};
+
+            /**
+             * resize the game div - wire up a resizable event
+             * snap the new size to something divisible by the block size
+             * trigger the game to resize
+             * @returns {void}
+             */
+            $(function () {
+                $("#game").resizable({
+                    resize: function (event, ui) {
+                        //ignore the event if the new size is too small
+                        if (ui.size.width < minSize.width) {
+                            ui.size.width = minSize.width;
+                        }
+                        if (ui.size.height < minSize.height) {
+                            ui.size.height = minSize.height;
+                        }
+
+                        //snap the size to something divisible by blockSize
+                        if (ui.size.width % game.blockSize) {
+                            ui.size.width -= ui.size.width % game.blockSize;
+                        }
+                        if (ui.size.height % game.blockSize) {
+                            ui.size.height -= ui.size.height % game.blockSize;
+                        }
+
+                        currentSize.width = ui.size.width;
+                        currentSize.height = ui.size.height;
+
+                        // resize the game 
+                        game.resize(currentSize.width, currentSize.height);
+                    }
+                });
+            });
+        </script>
+    </body>
+</html>
