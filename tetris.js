@@ -21,8 +21,8 @@
  * @param {type} color the css color of the block
  */
 function GameBlock(color) {
-    this.size = 20;
-    this.color = color;
+    var size = 20;
+    var color = color;
 }
 
 
@@ -37,22 +37,22 @@ function Game(canvasId) {
     //#region properties
 
     // the HTML5 canvas to draw on
-    this.canvas = document.getElementById(canvasId);
-    this.ctx = this.canvas.getContext("2d");
+    var canvas = document.getElementById(canvasId);
+    var ctx = canvas.getContext("2d");
 
     // find the GameBlock size
-    this.blockSize = new GameBlock(null).size;  // ask GameBlock how big the blocks are supposed to be
-    this.sideBarSize = this.blockSize * 6;      //The size of the sidebar, relative to the block size - sidebar is "6 blocks wide"
+    var blockSize = new GameBlock(null).size;  // ask GameBlock how big the blocks are supposed to be
+    var sideBarSize = blockSize * 6;      //The size of the sidebar, relative to the block size - sidebar is "6 blocks wide"
 
     // compute the board width possible given the canvas size and the block size
-    this.boardWidth = Math.floor(this.canvas.width / this.blockSize) - Math.floor(this.sideBarSize / this.blockSize);
-    this.boardHeight = Math.floor(this.canvas.height / this.blockSize);
+    var boardWidth = Math.floor(canvas.width / blockSize) - Math.floor(sideBarSize / blockSize);
+    var boardHeight = Math.floor(canvas.height / blockSize);
 
     /**
      * stores the hex colors of each shape for the varying difficulty levels
      * first row is difficulty 0, second is difficulty 1, ...
      */
-    this.colors = [
+    var colors = [
         ['cyan', 'blue', 'orange', 'yellow', 'green', 'purple', 'red'],
         ['#FFB60D', '#E80C68', '#004EFF', '#0CE817', '#FFB505', '#E80C8C', '#1BE80C'],
         ['#FF19CF', '#16C5E8', '#FFFA0C', '#E82914', '#1149FF', '#12FF04', '#9009FF'],
@@ -70,7 +70,7 @@ function Game(canvasId) {
      * every configuration of a 4x4 array can be described
      * inspired by: https://github.com/jakesgordon/javascript-tetris/blob/master/index.html
      */
-    this.shapes = {
+    var shapes = {
         i: {size: 4, blocks: [0x0F00, 0x2222, 0x00F0, 0x4444], color: 0},
         j: {size: 4, blocks: [0x44C0, 0x8E00, 0x6440, 0x0E20], color: 1},
         l: {size: 3, blocks: [0x4460, 0x0E80, 0xC440, 0x2E00], color: 2},
@@ -90,7 +90,7 @@ function Game(canvasId) {
      * 
      * For example, the second column here show a vertical bar. The sum of (0x0800 + 0x0400 + 0x0200 + 0x0100) = 0x0F00 above
      */
-    this.hexValues = [
+    var hexValues = [
         [0x8000, 0x0800, 0x0080, 0x0008],
         [0x4000, 0x0400, 0x0040, 0x0004],
         [0x2000, 0x0200, 0x0020, 0x0002],
@@ -99,31 +99,31 @@ function Game(canvasId) {
 
 
     /* GAME STATE */
-    this.difficulty = 0;
-    this.difficultyTimeouts = [1000, 750, 625, 500, 425, 300, 250, 225, 200, 175];
-    this.isRunning = false;
-    this.isPaused = false;
-    this.isGameOver = false;
+    var difficulty = 0;
+    var difficultyTimeouts = [1000, 750, 625, 500, 425, 300, 250, 225, 200, 175];
+    var isRunning = false;
+    var isPaused = false;
+    var isGameOver = false;
 
     //The game clock, used to tick the game forward, drop pieces, etc. (JS interval)
-    this.ticker = null;
+    var ticker = null;
 
     /* SCORE MODEL */
-    this.pointsAwardedForLines = [40, 100, 300, 1200];
-    this.scorePerLevel = [1200, 1200 * 4, 1200 * 8, 1200 * 16, 1200 * 32, 1200 * 64, 1200 * 128, 1200 * 256, 1200 * 512];
+    var pointsAwardedForLines = [40, 100, 300, 1200];
+    var scorePerLevel = [1200, 1200 * 4, 1200 * 8, 1200 * 16, 1200 * 32, 1200 * 64, 1200 * 128, 1200 * 256, 1200 * 512];
 
     /*
      * the Game contains a Board, Stats, and 2 Pieces
      * Game manages input, triggers Board and Piece redraw, and deals with game state
      */
-    this.gameBoard = null;
-    this.gameStats = null;
-    this.gamePiece = null;
-    this.nextPiece = null;
-    this.gameMusic = null;
+    var gameBoard = null;
+    var gameStats = null;
+    var gamePiece = null;
+    var nextPiece = null;
+    var gameMusic = null;
 
     // a cache to hold computed gradients
-    this.gradientCache = null;
+    var gradientCache = null;
 
     //#endregion properties
 
@@ -131,7 +131,7 @@ function Game(canvasId) {
      * returns a random GamePiece 
      * @returns {GamePiece}
      */
-    this.getRandomPiece = function () {
+    var getRandomPiece = function () {
         var temp_key, keys = [];
         for (temp_key in this.shapes) {
             if (this.shapes.hasOwnProperty(temp_key)) {
@@ -148,7 +148,7 @@ function Game(canvasId) {
      * if the "next" piece cannot be dropped on the board, the game is over
      * @returns {void}
      */
-    this.selectNextPiece = function () {
+    var selectNextPiece = function () {
         this.gamePiece = this.nextPiece;
         this.gamePiece.position = {x: Math.ceil((this.gameBoard.width - this.gamePiece.shapeDescription.size) / 2), y: 0};
         this.nextPiece = this.getRandomPiece();
@@ -172,7 +172,7 @@ function Game(canvasId) {
      * @param {int} shape hex value describing the shape
      * 
      */
-    this.indexContainsBlock = function (i, j, shape) {
+    var indexContainsBlock = function (i, j, shape) {
         // The shape contains i,j, so return true 
         // A block exists at this position in the shape because it was set in the bitmask describing the shape
         if (this.hexValues[i][j] & shape) {
@@ -185,7 +185,7 @@ function Game(canvasId) {
     /**
      * handles user input
      */
-    this.handleInput = function (e) {
+    var handleInput = function (e) {
         switch (e.keyCode) {
             case 38:
                 if (!this.isPaused && this.gamePiece && this.gameBoard.isValidMove(this.gamePiece, "rotate")) {
@@ -231,7 +231,7 @@ function Game(canvasId) {
      * @param {Context} context the context to draw on
      * @returns {gradient}
      */
-    this.getGradient = function (type, color, context) {
+    var getGradient = function (type, color, context) {
         // optimization - search the gradient cache to see if we have already compiled this gradient
         var gradientType = "1:";
         if (type === "baked") {
@@ -264,7 +264,7 @@ function Game(canvasId) {
      * Clears the canvas and draws the gameBoard, gamePieces, and stats
      * @returns {void}
      */
-    this.draw = function () {
+    var draw = function () {
         //wipe the canvas so we can redraw
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
@@ -291,7 +291,7 @@ function Game(canvasId) {
      * triggers a repaint
      * @returns {void}
      */
-    this.gameTick = function () {
+    var gameTick = function () {
         //Move the gamePiece down 1
         if (game.gamePiece) {
             if (game.gameBoard.isValidMove(game.gamePiece, "down")) {
@@ -308,7 +308,7 @@ function Game(canvasId) {
      * start the game - unset any existing ticker and create a new one, based on difficulty
      * @returns {void}
      */
-    this.start = function () {
+    var start = function () {
         if (!this.isRunning) {
             this.selectNextPiece();
             if (this.ticker) {
@@ -327,7 +327,7 @@ function Game(canvasId) {
      * pause/resume the game. If the game was over, resets the game
      * @returns {void}
      */
-    this.togglePause = function () {
+    var togglePause = function () {
         if (!this.isPaused) {
             clearInterval(this.ticker);
             this.ticker = null;
@@ -349,7 +349,7 @@ function Game(canvasId) {
      * resets the game clock, clearing any soon-to-expire interval
      * @returns {void}
      */
-    this.resetTimer = function () {
+    var resetTimer = function () {
         clearInterval(this.ticker);
         this.ticker = setInterval(this.gameTick, this.difficultyTimeouts[this.difficulty]);
     };
@@ -358,7 +358,7 @@ function Game(canvasId) {
      * resets this game
      * @returns {void}
      */
-    this.reset = function () {
+    var reset = function () {
         clearInterval(this.ticker);
         this.ticker = null;
         this.difficulty = 0;
@@ -382,7 +382,7 @@ function Game(canvasId) {
      * @param {int} height (in px)
      * @returns {void}
      */
-    this.resize = function (width, height) {
+    var resize = function (width, height) {
         //resize the canvas
         this.canvas.width = width;
         this.canvas.height = height;
@@ -409,7 +409,7 @@ function Game(canvasId) {
      * initializes the Game
      * @returns void
      */
-    this.init = function () {
+    var init = function () {
         this.gameBoard = new GameBoard(this, this.boardWidth, this.boardHeight);
         this.gameStats = new GameStats(this);
         this.gamePiece = null;
@@ -439,21 +439,21 @@ function Game(canvasId) {
  */
 function GameBoard(game, width, height) {
 
-    this.game = game;
-    this.width = width;
-    this.height = height;
+    var game = game;
+    var width = width;
+    var height = height;
 
     // this GameBoard hold a <canvas> as a cache - the cache is updated/invalidated as necessary
-    this.canvasCache = new CanvasCache(this.game, this.width, this.height);
+    var canvasCache = new CanvasCache(game, width, height);
 
     //a 2D array to model the game board
-    this.gameBoard = [];
+    var gameBoard = [];
 
     //Populate the board array with zeros
-    for (i = 0; i < this.width; i++) {
-        this.gameBoard[i] = [];
-        for (j = 0; j < this.height; j++) {
-            this.gameBoard[i][j] = 0;
+    for (i = 0; i < width; i++) {
+        gameBoard[i] = [];
+        for (j = 0; j < height; j++) {
+            gameBoard[i][j] = 0;
         }
     }
 
@@ -463,7 +463,7 @@ function GameBoard(game, width, height) {
      * @param {type} y
      * @returns {Boolean}
      */
-    this.isOnBoard = function (x, y) {
+    var isOnBoard = function (x, y) {
         if (x >= 0 && y >= 0 && x < this.gameBoard.length && y < this.gameBoard[0].length) {
             return true;
         } else {
@@ -476,7 +476,7 @@ function GameBoard(game, width, height) {
      * @param int x 
      * @param int y
      */
-    this.isOccupied = function (x, y) {
+    var isOccupied = function (x, y) {
         if (!this.isOnBoard(x, y)) {
             return true;
         }
@@ -487,7 +487,7 @@ function GameBoard(game, width, height) {
         }
     };
 
-    this.isUnoccupied = function (x, y) {
+    var isUnoccupied = function (x, y) {
         return !this.isOccupied(x, y);
     };
 
@@ -498,7 +498,7 @@ function GameBoard(game, width, height) {
      * @param {string} direction the direction to move/rotate
      * @returns {boolean} whether the move is possible 
      */
-    this.isValidMove = function (gamePiece, direction) {
+    var isValidMove = function (gamePiece, direction) {
         // clone the gamePiece to simulate the action
         var tmpPiece = new GamePiece(this.game, null);
         tmpPiece.shapeDescription = gamePiece.shapeDescription;
@@ -548,7 +548,7 @@ function GameBoard(game, width, height) {
      * @param {GamePiece} gamePiece the game piece that was just baked onto the board
      * @returns {array} the indices of any completed lines that will need to be removed
      */
-    this.checkLines = function (gamePiece) {
+    var checkLines = function (gamePiece) {
         var completedLines = [];
         var minY, maxY;
         if (gamePiece) {
@@ -583,7 +583,7 @@ function GameBoard(game, width, height) {
      * 
      * @param {array} completedLines
      */
-    this.clearLines = function (completedLines) {
+    var clearLines = function (completedLines) {
         if (completedLines.length > 0) {
 
             //sort the completed lines to sweep from top-to-bottom (ascending order)
@@ -619,7 +619,7 @@ function GameBoard(game, width, height) {
      * copies (bakes) a piece onto the game board and replaces the game piece in play with a new one
      * @param {GamePiece} gamePiece the GamePiece to bake on the GameBoard
      */
-    this.bakePiece = function (gamePiece) {
+    var bakePiece = function (gamePiece) {
         if (gamePiece instanceof GamePiece) {
             var rawPiece = this.game.gamePiece;              //The "uncooked" game piece
             //copy this piece onto the board
@@ -664,7 +664,7 @@ function GameBoard(game, width, height) {
      * @param {GamePiece} gamePiece
      * @returns {void}
      */
-    this.drawBakedPiece = function (gamePiece) {
+    var drawBakedPiece = function (gamePiece) {
         var cacheContext = this.canvasCache.context;
         gamePiece.draw("baked", cacheContext);
     };
@@ -674,7 +674,7 @@ function GameBoard(game, width, height) {
      * @param {int} width
      * @param {int} height
      */
-    this.resize = function (newWidth, newHeight) {
+    var resize = function (newWidth, newHeight) {
         //find the difference between the current size of the canvas and the game board
         for (i = 0; i < Math.max(this.width, newWidth); i++) {
             if (i >= newWidth) {
@@ -717,8 +717,7 @@ function GameBoard(game, width, height) {
      * draws the game board on the canvas
      * the game board consists of Blocks already baked onto it
      */
-    this.draw = function () {
-
+    var draw = function () {
         if (!this.canvasCache.isValid()) {
             // the cached canvas is considered invalid - clear the cached canvas and draw fresh
             var cacheContext = this.canvasCache.context;
@@ -771,14 +770,14 @@ function GameBoard(game, width, height) {
  * @returns {CanvasCache}
  */
 function CanvasCache(game, width, height) {
-    this.game = game;
-    this.canvas = document.createElement('canvas');
-    this.canvas.id = "cache";
-    this.canvas.width = width * this.game.blockSize;
-    this.canvas.height = height * this.game.blockSize;
-    this.game.canvas.appendChild(this.canvas);
-    this.context = this.canvas.getContext('2d');
-    this.isReady = false;
+    var game = game;
+    var canvas = document.createElement('canvas');
+    var canvas.id = "cache";
+    var canvas.width = width * game.blockSize;
+    var canvas.height = height * game.blockSize;
+    var game.canvas.appendChild(canvas);
+    var context = canvas.getContext('2d');
+    var isReady = false;
 
     /**
      * resize the canvas and invalidate the cache to force a fresh draw
@@ -786,7 +785,7 @@ function CanvasCache(game, width, height) {
      * @param {int} height (in blocks)
      * @returns {void}
      */
-    this.resize = function (width, height) {
+    var resize = function (width, height) {
         this.canvas.width = width * this.game.blockSize;
         this.canvas.height = height * this.game.blockSize;
         this.invalidate();
@@ -796,7 +795,7 @@ function CanvasCache(game, width, height) {
      * determines if the cache is valid and can be drawn as-is
      * @returns {Boolean}
      */
-    this.isValid = function () {
+    var isValid = function () {
         return this.isReady;
     };
 
@@ -804,7 +803,7 @@ function CanvasCache(game, width, height) {
      * marks the cache invalid to force a rebuild
      * @returns {void}
      */
-    this.invalidate = function () {
+    var invalidate = function () {
         this.isReady = false;
     };
 
@@ -812,7 +811,7 @@ function CanvasCache(game, width, height) {
      * marks the cache valid - the cache can now be used as-is
      * @returns {void}
      */
-    this.validate = function () {
+    var validate = function () {
         this.isReady = true;
     };
 
@@ -823,15 +822,15 @@ function CanvasCache(game, width, height) {
  * @returns {GradientCache}
  */
 function GradientCache() {
-    this.cache = {};
-    this.get = function (key) {
+    var cache = {};
+    var get = function (key) {
         if (this.cache[key]) {
             return this.cache[key];
         } else {
             return null;
         }
     };
-    this.set = function (key, gradient) {
+    var set = function (key, gradient) {
         this.cache[key] = gradient;
     };
 }
@@ -842,36 +841,36 @@ function GradientCache() {
  * @param {string} shape char value describing this shape 
  */
 function GamePiece(game, shape) {
-    this.game = game;
+    var game = game;
     /**
      * The shape is denoted by a char in the list [i,j,l,o,s,t,z]
      * This is the key into the hashed set of precomputed shapes
      */
-    this.shapeDescription = this.game.shapes[shape];
+    var shapeDescription = game.shapes[shape];
 
     /**
      * the current 90 degree rotation [0,1,2,3] for this piece
      */
-    this.rotation = 0;
+    var rotation = 0;
 
     /**
      * This contains the shape array, given the current rotation + shapeDescription
      */
-    this.shapeArray = [];
+    var shapeArray = [];
 
     //FIXME: to hard-code or not to hard-code...
-    this.height = 4;
-    this.width = 4;
+    var height = 4;
+    var width = 4;
 
     /**
      * The position of this piece on the board
      */
-    this.position = {x: 0, y: 0};
+    var position = {x: 0, y: 0};
 
     /**
      * Populate the 2D array for this shape, given the current rotation + shapeDescription
      */
-    this.computeShape = function () {
+    var computeShape = function () {
         for (i = 0; i < this.height; i++) {
             this.shapeArray[i] = [];
             for (j = 0; j < this.width; j++) {
@@ -892,7 +891,7 @@ function GamePiece(game, shape) {
      * wipes the shape array to force the shape to be recompiled 
      * @returns {void}
      */
-    this.rotate = function () {
+    var rotate = function () {
         //rotate the piece  - don't bother doing any collision checking here as this may be a synth test
         if (this.rotation <= 2) {
             this.rotation++;
@@ -907,7 +906,7 @@ function GamePiece(game, shape) {
      * @param {string} direction ['right','left','down','rotate']
      * @returns {void}
      */
-    this.move = function (direction) {
+    var move = function (direction) {
         switch (direction) {
             case 'right':
                 this.position.x += 1;
@@ -928,7 +927,7 @@ function GamePiece(game, shape) {
      * @param {type} context
      * @returns {void}
      */
-    this.draw = function (type, context) {
+    var draw = function (type, context) {
         // draws on the context passed to the function, otherwise the game's context
         if (!context) {
             context = this.game.ctx;
@@ -983,10 +982,10 @@ function GamePiece(game, shape) {
  */
 function GameStats(game) {
 
-    this.game = game;
-    this.score = 0;
+    var game = game;
+    var score = 0;
 
-    this.addScore = function (val) {
+    var addScore = function (val) {
         this.score += val;
         if (this.game.gameStats.score > this.game.scorePerLevel[this.game.difficulty]) {
             //proceed to the next level
@@ -997,11 +996,11 @@ function GameStats(game) {
         }
     };
 
-    this.resetScore = function () {
+    var resetScore = function () {
         this.score = 0;
     };
 
-    this.draw = function () {
+    var draw = function () {
         this.game.ctx.font = "20px Verdana";
         // Create gradient
         var gradient = this.game.ctx.createLinearGradient(0, 0, this.game.canvas.width, 0);
@@ -1062,25 +1061,25 @@ function GameStats(game) {
 }
 
 function GameMusic(game) {
-    this.game = game;
-    this.player = null;
-    this.isPlaying = false;
+    var game = game;
+    var player = null;
+    var isPlaying = false;
 
-    this.start = function () {
+    var start = function () {
         this.player.play();
         this.isPlaying = true;
     };
 
-    this.pause = function () {
+    var pause = function () {
         this.player.pause();
     };
-    this.selectTrack = function (track, loop) {
+    var selectTrack = function (track, loop) {
         this.player.src = track;
         this.player.loop = loop;
         this.player.load();
     };
 
-    this.init = function (track) {
+    var init = function (track) {
         audio = document.createElement("audio");
         audio.src = track;
         audio.loop = true;
